@@ -14,7 +14,7 @@ class _HoveringHeaderListDemoState extends State<HoveringHeaderListDemo> {
   Widget build(ctx) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("hover_header_list"),
+        title: Text("hovering_header_list"),
       ),
       body: HoveringHeaderList(
         key: _globalKey,
