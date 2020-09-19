@@ -24,15 +24,24 @@ class _HoveringHeaderListDemoState extends State<HoveringHeaderListDemo> {
 
         ///header builder
         sectionHeaderBuild: (ctx, section) {
-          return Header(
-            "我是段头 $section",
-            color: Colors.orange,
-          );
+          if (section % 2 == 0) {
+            return Header(
+              "我是第一种段头 $section",
+            );
+          } else {
+            return Header2(
+              "我是第二种段头 $section",
+            );
+          }
         },
 
         ///header高度
         headerHeightForSection: (section) {
-          return Header.height;
+          if(section % 2 == 0) {
+            return Header.height;
+          } else {
+            return Header2.height;
+          }
         },
 
         ///item builder
@@ -162,6 +171,27 @@ class Header extends StatelessWidget {
       alignment: Alignment(-0.8, 0.0),
       height: height,
       color: color ?? Colors.orange,
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 20, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class Header2 extends StatelessWidget {
+  static final height = 80.0;
+  final String title;
+  final Color color;
+
+  Header2(this.title, {this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment(-0.8, 0.0),
+      height: height,
+      color: color ?? Colors.green,
       child: Text(
         title,
         style: TextStyle(fontSize: 20, color: Colors.white),
