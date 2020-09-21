@@ -18,3 +18,5 @@ typedef HeaderHeightForSection = double Function(int section);
 typedef ItemHeightForIndexPath = double Function(SectionIndexPath indexPath);
 typedef SeparatorHeightForIndexPath = double Function(
     SectionIndexPath indexPath, bool isLast);
+typedef SectionListOffsetChanged = void Function(
+    double currentOffset, double maxOffset);

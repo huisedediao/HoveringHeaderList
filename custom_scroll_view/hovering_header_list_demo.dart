@@ -9,6 +9,7 @@ class HoveringHeaderListDemo extends StatefulWidget {
 
 class _HoveringHeaderListDemoState extends State<HoveringHeaderListDemo> {
   GlobalKey<HoveringHeaderListState> _globalKey = GlobalKey();
+  List<int> _itemCounts = [5, 5];
 
   @override
   Widget build(ctx) {
@@ -20,7 +21,7 @@ class _HoveringHeaderListDemoState extends State<HoveringHeaderListDemo> {
         key: _globalKey,
 
         ///分组信息，每组有几个item
-        itemCounts: List.generate(5, (index) => 5),
+        itemCounts: _itemCounts,
 
         ///header builder
         sectionHeaderBuild: (ctx, section) {
@@ -37,7 +38,7 @@ class _HoveringHeaderListDemoState extends State<HoveringHeaderListDemo> {
 
         ///header高度
         headerHeightForSection: (section) {
-          if(section % 2 == 0) {
+          if (section % 2 == 0) {
             return Header.height;
           } else {
             return Header2.height;
@@ -48,13 +49,13 @@ class _HoveringHeaderListDemoState extends State<HoveringHeaderListDemo> {
         itemBuilder: (ctx, indexPath, height) {
           if (indexPath.index % 2 == 0) {
             return CellOne("我是第一种cell $indexPath", () {
-              _globalKey.currentState.animateToIndexPath(SectionIndexPath(2, 3),
-                  duration: Duration(seconds: 1), curve: Curves.ease);
+//              _globalKey.currentState.animateToIndexPath(SectionIndexPath(2, 3),
+//                  duration: Duration(seconds: 1), curve: Curves.ease);
             });
           } else {
             return CellTwo("我是第二种cell $indexPath", () {
-              _globalKey.currentState.animateToIndexPath(SectionIndexPath(3, 2),
-                  duration: Duration(seconds: 1), curve: Curves.ease);
+//              _globalKey.currentState.animateToIndexPath(SectionIndexPath(3, 2),
+//                  duration: Duration(seconds: 1), curve: Curves.ease);
             });
           }
         },
@@ -81,21 +82,38 @@ class _HoveringHeaderListDemoState extends State<HoveringHeaderListDemo> {
 
         ///滚动到底部和离开底部的回调
         onEndChanged: (end) {
-          print("end : $end");
+//          print("end : $end");
         },
 
         ///offset改变回调
-        offsetChanged: (offset) {
+        onOffsetChanged: (offset, maxOffset) {
 //        print("111111:offset : $offset");
         },
 
         ///滚动到顶部和离开顶部的回调
         onTopChanged: (top) {
-          print("top:$top");
+//          print("top:$top");
         },
 
         ///是否需要悬停header
         hover: true,
+
+//        ///是否需要上拉加载更多
+//        needLoadMore: true,
+//
+//        ///开始加载更多
+//        onBeginLoadMore: () {
+//          print("开始加载更多");
+//          Future.delayed(Duration(seconds: 2), () {
+////            setState(() {
+////              _itemCounts = [5, 5, 5, 5, 5, 4, 3, 2];
+////            });
+//            print("加载完成");
+//            _globalKey.currentState.endLoadMore();
+//          });
+//        },
+
+//          needSafeArea: true,
       ),
     );
   }

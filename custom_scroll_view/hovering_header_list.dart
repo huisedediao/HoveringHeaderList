@@ -14,12 +14,13 @@ class HoveringHeaderList extends StatefulWidget {
   final HoverHeaderListSeparatorBuilder separatorBuilder;
   final ValueChanged onTopChanged;
   final ValueChanged onEndChanged;
-  final ValueChanged offsetChanged;
+  final SectionListOffsetChanged onOffsetChanged;
   final double initialScrollOffset;
   final ItemHeightForIndexPath itemHeightForIndexPath;
   final SeparatorHeightForIndexPath separatorHeightForIndexPath;
   final HeaderHeightForSection headerHeightForSection;
   final bool hover;
+  final bool needSafeArea;
 
   HoveringHeaderList(
       {@required this.itemCounts,
@@ -31,9 +32,10 @@ class HoveringHeaderList extends StatefulWidget {
       this.separatorBuilder,
       this.onTopChanged,
       this.onEndChanged,
-      this.offsetChanged,
+      this.onOffsetChanged,
       this.initialScrollOffset = 0,
       this.hover = true,
+      this.needSafeArea = false,
       Key key})
       : assert(
             (separatorHeightForIndexPath == null && separatorBuilder == null) ||
@@ -56,7 +58,7 @@ class HoveringHeaderList extends StatefulWidget {
 class HoveringHeaderListState extends State<HoveringHeaderList> {
   double _lastOffset = 0;
   int _hoverOffsetInfoIndex = 0;
-  GlobalKey<SectionListState> _globalKey = GlobalKey();
+  GlobalKey<SectionListState> _sectionListKey = GlobalKey();
 
   ///用于控制hoverHeader偏移量和是否显示
   HoveringHeaderVM _hoverVM;
@@ -65,7 +67,7 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
   Map<int, HoveringOffsetInfo> _hoverOffsetInfoMap;
 
   jumpTo(double offset) {
-    _globalKey.currentState.jumpTo(offset);
+    _sectionListKey.currentState.jumpTo(offset);
   }
 
   jumpToIndexPath(SectionIndexPath indexPath) {
@@ -80,7 +82,8 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
     @required Duration duration,
     @required Curve curve,
   }) {
-    _globalKey.currentState.animateTo(offset, duration: duration, curve: curve);
+    _sectionListKey.currentState
+        .animateTo(offset, duration: duration, curve: curve);
   }
 
   animateToIndexPath(
@@ -108,7 +111,7 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
     if (widget.hover) {
       return Stack(
         children: <Widget>[
-          _buildSectionListView(),
+          _buildSectionList(),
           ChangeNotifierProvider(create: (ctx) {
             return _hoverVM;
           }, child: Consumer(
@@ -123,11 +126,11 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
         ],
       );
     } else {
-      return _buildSectionListView();
+      return _buildSectionList();
     }
   }
 
-  _buildSectionListView() {
+  _buildSectionList() {
     return SectionList(
       itemCounts: widget.itemCounts,
       sectionHeaderBuilder: _sectionHeaderBuilder,
@@ -135,11 +138,14 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
       separatorBuilder: _separatorBuilder,
       onTopChanged: widget.onTopChanged,
       onEndChanged: widget.onEndChanged,
-      offsetChanged: _handleOffset,
+      onOffsetChanged: _handleOffset,
       initialScrollOffset: widget.initialScrollOffset,
-      key: _globalKey,
+      needSafeArea: widget.needSafeArea,
+      key: _sectionListKey,
     );
   }
+
+//  _buildSection
 
   Widget _sectionHeaderBuilder(ctx, section) {
     //            print("sectionHeaderBuild : $section");
@@ -189,9 +195,9 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
     );
   }
 
-  _handleOffset(offset) {
-    if (widget.offsetChanged != null) {
-      widget.offsetChanged(offset);
+  _handleOffset(offset, maxOffset) {
+    if (widget.onOffsetChanged != null) {
+      widget.onOffsetChanged(offset, maxOffset);
     }
 
     if (widget.hover == false) return;
@@ -287,7 +293,7 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
       if (widget.hover == false || i != section) {
         double headerH = widget.headerHeightForSection(i);
         offset += headerH;
-        print("section:$section,headerH:$headerH");
+//        print("section:$section,headerH:$headerH");
       }
       int counts = widget.itemCounts[i];
       int itemCount;
@@ -306,12 +312,12 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
             separatorH = widget.separatorHeightForIndexPath(
                 tempIndexPath, j == counts - 1);
           }
-          print("indexPath:$tempIndexPath,itemH:$itemH,separatorH:$separatorH");
+//          print("indexPath:$tempIndexPath,itemH:$itemH,separatorH:$separatorH");
           offset += itemH + separatorH;
         }
       }
     }
-    print("_computeJumpIndexPathOffset : $offset");
+//    print("_computeJumpIndexPathOffset : $offset");
     return offset;
   }
 }

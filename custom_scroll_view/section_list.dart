@@ -9,8 +9,9 @@ class SectionList extends StatefulWidget {
   final SectionListSeparatorBuilder separatorBuilder;
   final ValueChanged onTopChanged;
   final ValueChanged onEndChanged;
-  final ValueChanged offsetChanged;
+  final SectionListOffsetChanged onOffsetChanged;
   final double initialScrollOffset;
+  final bool needSafeArea;
 
   SectionList(
       {@required this.itemCounts,
@@ -19,8 +20,9 @@ class SectionList extends StatefulWidget {
       this.separatorBuilder,
       this.onTopChanged,
       this.onEndChanged,
-      this.offsetChanged,
+      this.onOffsetChanged,
       this.initialScrollOffset = 0,
+      this.needSafeArea = false,
       Key key})
       : assert(itemCounts != null, "itemCounts must not be null"),
         assert(sectionHeaderBuilder != null,
@@ -77,8 +79,8 @@ class SectionListState extends State<SectionList> {
           widget.onEndChanged(_end);
         }
       }
-      if (widget.offsetChanged != null) {
-        widget.offsetChanged(offset);
+      if (widget.onOffsetChanged != null) {
+        widget.onOffsetChanged(offset, _controller.position.maxScrollExtent);
       }
     });
   }
@@ -89,32 +91,40 @@ class SectionListState extends State<SectionList> {
     return CustomScrollView(
       controller: _controller,
       physics: AlwaysScrollableScrollPhysics(),
-      slivers: [
-        SliverSafeArea(
-            sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((ctx, index) {
-          if (_isHeaderIndex(index)) {
-            int section = _headerIndexMap[index];
-            return widget.sectionHeaderBuilder(ctx, section);
-          } else {
-            int headerIndex = _headerIndex(index);
-            int section = _headerIndexMap[headerIndex];
-            int sectionIndex = index - headerIndex;
-            if (_isItemIndex(sectionIndex)) {
-              print(index);
-              int fixIndex = (sectionIndex - 1) ~/ 2;
-              return widget.itemBuilder(
-                  ctx, SectionIndexPath(section, fixIndex));
-            } else {
-              int fixIndex = (sectionIndex - 1) ~/ 2;
-              bool isLast = fixIndex == widget.itemCounts[section] - 1;
-              return widget.separatorBuilder(
-                  ctx, SectionIndexPath(section, fixIndex), isLast);
-            }
-          }
-        }, childCount: _itemCounts())))
-      ],
+      slivers: _buildSlivers(),
     );
+  }
+
+  List<Widget> _buildSlivers() {
+    if (widget.needSafeArea) {
+      return [SliverSafeArea(sliver: _buildSliverList())];
+    } else {
+      return [_buildSliverList()];
+    }
+  }
+
+  _buildSliverList() {
+    return SliverList(
+        delegate: SliverChildBuilderDelegate((ctx, index) {
+      if (_isHeaderIndex(index)) {
+        int section = _headerIndexMap[index];
+        return widget.sectionHeaderBuilder(ctx, section);
+      } else {
+        int headerIndex = _headerIndex(index);
+        int section = _headerIndexMap[headerIndex];
+        int sectionIndex = index - headerIndex;
+        if (_isItemIndex(sectionIndex)) {
+//              print(index);
+          int fixIndex = (sectionIndex - 1) ~/ 2;
+          return widget.itemBuilder(ctx, SectionIndexPath(section, fixIndex));
+        } else {
+          int fixIndex = (sectionIndex - 1) ~/ 2;
+          bool isLast = fixIndex == widget.itemCounts[section] - 1;
+          return widget.separatorBuilder(
+              ctx, SectionIndexPath(section, fixIndex), isLast);
+        }
+      }
+    }, childCount: _itemCounts()));
   }
 
   _itemCounts() {
