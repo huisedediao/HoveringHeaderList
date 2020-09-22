@@ -66,6 +66,11 @@ class HoveringHeaderListState extends State<HoveringHeaderList> {
   ///section : HoverOffsetInfo
   Map<int, HoveringOffsetInfo> _hoverOffsetInfoMap;
 
+  ///清除已经缓存的高度信息，在下拉刷新时使用
+  clean() {
+    _hoverOffsetInfoMap = {};
+  }
+
   jumpTo(double offset) {
     _sectionListKey.currentState.jumpTo(offset);
   }
